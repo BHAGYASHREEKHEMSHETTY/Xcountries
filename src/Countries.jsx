@@ -1,51 +1,49 @@
 import React, { useEffect, useState } from "react";
 
-// ✅ CountryCard component
 const CountryCard = ({ name, flag, abbr }) => {
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <img
-        src={flag}
-        alt={`Flag of ${abbr}`}
-        style={{ width: "100px", height: "100px", borderRadius: "5px" }}
-      />
-      <p>{name}</p>
+    <div className="country-card">
+      <img src={flag} alt={name} />
+      <h3>{name}</h3>
+      <p>{abbr}</p>
     </div>
   );
 };
 
-// ✅ API endpoint
 const API_ENDPOINT = "https://xcountries-backend.labs.crio.do/all";
 
 export default function Countries() {
   const [countries, setCountries] = useState([]);
+  const [error, setError] = useState(false);
 
-  // ✅ Fetch data on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch(API_ENDPOINT);
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
         const data = await response.json();
         setCountries(data);
       } catch (error) {
-        console.error("Error fetching countries:", error);
+        console.error("Error fetching data:", error);
+        setError(true);
       }
     };
+
     fetchData();
   }, []);
 
-  // ✅ Render country cards
+  if (error) {
+    return <div>Failed to load countries</div>;
+  }
+
+  if (countries.length === 0 && !error) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <div
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: "20px",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: "20px",
-      }}
-    >
+    <div className="countries-list">
       {countries.map(({ name, flag, abbr }) => (
         <CountryCard key={abbr} name={name} flag={flag} abbr={abbr} />
       ))}
